@@ -1,0 +1,3494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IM8 × Strava | Love Life Challenge</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  :root {
+    --crimson: #8C0015;
+    --crimson-deep: #5A000D;
+    --coral: #F08070;
+    --cream: #F5EFE6;
+    --cream-dark: #EDE5D8;
+    --black: #0A0A0A;
+    --white: #FFFFFF;
+    --strava-orange: #FC4C02;
+    --gold: #C9A96E;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: var(--black);
+  }
+
+  .deck {
+    width: 100%;
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
+  .slide {
+    width: 100%;
+    height: 100vh;
+    scroll-snap-align: start;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nav-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .nav-dot.active { background: var(--coral); width: 6px; height: 18px; border-radius: 3px; }
+
+  .slide-counter {
+    position: fixed;
+    bottom: 24px;
+    right: 32px;
+    z-index: 1000;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.1em;
+  }
+
+  .arrow-nav {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    gap: 12px;
+  }
+
+  .arrow-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.4);
+    color: white;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+    backdrop-filter: blur(10px);
+  }
+
+  .arrow-btn:hover { border-color: var(--coral); color: var(--coral); }
+
+  /* ==========================================
+     SLIDE 1: COVER
+  ========================================== */
+  .slide-cover {
+    background: var(--crimson-deep);
+    background: linear-gradient(135deg, #1A0008 0%, #5A000D 40%, #8C0015 70%, #A30018 100%);
+  }
+
+  .cover-noise {
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.3;
+  }
+
+  .cover-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(245,239,230,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(245,239,230,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .cover-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 40px;
+    max-width: 900px;
+  }
+
+  .partnership-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(245,239,230,0.08);
+    border: 1px solid rgba(245,239,230,0.15);
+    border-radius: 100px;
+    padding: 10px 24px;
+    margin-bottom: 48px;
+    backdrop-filter: blur(10px);
+  }
+
+  .im8-logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--cream);
+    letter-spacing: 0.15em;
+  }
+
+  .x-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(245,239,230,0.3);
+  }
+
+  .strava-logo-text {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--strava-orange);
+    letter-spacing: 0.1em;
+  }
+
+  .cover-headline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(52px, 7vw, 96px);
+    font-weight: 300;
+    color: var(--cream);
+    line-height: 1.0;
+    margin-bottom: 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .cover-headline em {
+    font-style: italic;
+    color: var(--coral);
+  }
+
+  .cover-sub {
+    font-size: 16px;
+    font-weight: 300;
+    color: rgba(245,239,230,0.6);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 64px;
+  }
+
+  .cover-kpi-strip {
+    display: flex;
+    justify-content: center;
+    gap: 64px;
+    border-top: 1px solid rgba(245,239,230,0.1);
+    padding-top: 40px;
+  }
+
+  .kpi-item { text-align: center; }
+
+  .kpi-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 600;
+    color: var(--coral);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(245,239,230,0.5);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* ==========================================
+     SLIDE 2: THE PLATFORM
+  ========================================== */
+  .slide-platform { background: #0D0D0D; }
+
+  .slide-platform .inner {
+    max-width: 1100px;
+    width: 100%;
+    padding: 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--strava-orange);
+    margin-bottom: 20px;
+  }
+
+  .slide-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(36px, 4vw, 58px);
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 20px;
+  }
+
+  .slide-title em { font-style: italic; color: var(--coral); }
+
+  .slide-body {
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 32px;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+
+  .stat-card .num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px;
+    font-weight: 600;
+    color: var(--coral);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-card .label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .platform-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .platform-card {
+    background: rgba(252,76,2,0.07);
+    border: 1px solid rgba(252,76,2,0.15);
+    border-radius: 16px;
+    padding: 24px 28px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .platform-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(252,76,2,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .platform-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .platform-card-body {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.5;
+  }
+
+  /* ==========================================
+     SLIDE 3: THE AUDIENCE
+  ========================================== */
+  .slide-audience {
+    background: var(--cream);
+  }
+
+  .slide-audience .inner {
+    max-width: 1100px;
+    width: 100%;
+    padding: 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .slide-audience .section-label { color: var(--crimson); }
+
+  .slide-audience .slide-title { color: var(--black); }
+
+  .slide-audience .slide-body { color: rgba(0,0,0,0.55); }
+
+  .audience-stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .audience-bar {
+    background: rgba(0,0,0,0.04);
+    border-radius: 100px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    border: 1px solid rgba(0,0,0,0.08);
+    gap: 16px;
+  }
+
+  .audience-bar-fill {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--crimson), var(--coral));
+    flex-shrink: 0;
+  }
+
+  .audience-bar-pct {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--crimson);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .audience-bar-text {
+    font-size: 13px;
+    color: rgba(0,0,0,0.6);
+    line-height: 1.3;
+  }
+
+  .audience-highlight-box {
+    background: var(--crimson);
+    border-radius: 20px;
+    padding: 36px;
+    color: white;
+  }
+
+  .audience-highlight-box .big-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 72px;
+    font-weight: 600;
+    color: var(--coral);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .audience-highlight-box p {
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.6;
+    opacity: 0.85;
+  }
+
+  .audience-highlight-box .divider-line {
+    width: 40px;
+    height: 2px;
+    background: var(--coral);
+    margin: 20px 0;
+  }
+
+  .audience-market-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .market-card {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .market-card .mnum {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--coral);
+  }
+
+  .market-card .mlabel {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  /* ==========================================
+     SLIDE 4: AD PROBLEM
+  ========================================== */
+  .slide-adproblem {
+    background: #0A0A0A;
+  }
+
+  .slide-adproblem .inner {
+    max-width: 1100px;
+    width: 100%;
+    padding: 80px;
+    text-align: center;
+  }
+
+  .adproblem-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 48px;
+  }
+
+  .adproblem-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 32px 20px;
+    text-align: center;
+  }
+
+  .adproblem-card .pct {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 58px;
+    font-weight: 600;
+    color: var(--strava-orange);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .adproblem-card .desc {
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.5;
+  }
+
+  .solution-banner {
+    margin-top: 48px;
+    background: linear-gradient(135deg, var(--crimson), #A30018);
+    border-radius: 20px;
+    padding: 36px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+  }
+
+  .solution-banner-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: white;
+    line-height: 1.3;
+    text-align: left;
+  }
+
+  .solution-banner-text em { font-style: italic; color: var(--coral); }
+
+  .solution-banner-stat {
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .solution-banner-stat .big {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 600;
+    color: var(--coral);
+    line-height: 1;
+  }
+
+  .solution-banner-stat .small {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .solution-banner-divider {
+    width: 1px;
+    height: 60px;
+    background: rgba(255,255,255,0.2);
+    flex-shrink: 0;
+  }
+
+  /* ==========================================
+     SLIDE 5: THE CHALLENGE CONCEPT
+  ========================================== */
+  .slide-concept {
+    background: var(--crimson-deep);
+    background: linear-gradient(135deg, #1A0008 0%, #5A000D 100%);
+  }
+
+  .slide-concept .inner {
+    max-width: 1100px;
+    width: 100%;
+    padding: 80px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .challenge-badge-large {
+    width: 260px;
+    height: 260px;
+    margin: 0 auto 32px;
+    display: block;
+  }
+
+  .challenge-details-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .challenge-detail {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 20px;
+    background: rgba(245,239,230,0.06);
+    border: 1px solid rgba(245,239,230,0.1);
+    border-radius: 12px;
+  }
+
+  .challenge-detail-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(240,128,112,0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .challenge-detail-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 2px;
+  }
+
+  .challenge-detail-value {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(245,239,230,0.85);
+    line-height: 1.4;
+  }
+
+  .concept-right .slide-title { color: var(--cream); }
+  .concept-right .slide-body { color: rgba(245,239,230,0.6); }
+  .concept-right .section-label { color: var(--coral); }
+
+  .challenge-name-display {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--cream);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .challenge-tagline {
+    font-size: 14px;
+    color: var(--coral);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+
+  .reward-box {
+    background: rgba(240,128,112,0.1);
+    border: 1px solid rgba(240,128,112,0.25);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .reward-box-icon { font-size: 24px; }
+
+  .reward-box-text .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 4px;
+  }
+
+  .reward-box-text .value {
+    font-size: 14px;
+    color: var(--cream);
+    line-height: 1.4;
+  }
+
+  .code-pill {
+    display: inline-block;
+    background: var(--coral);
+    color: var(--crimson-deep);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+
+  /* ==========================================
+     SLIDE 6: APP MOCKUP
+  ========================================== */
+  .slide-mockup {
+    background: #0D0D0D;
+  }
+
+  .slide-mockup .inner {
+    max-width: 1200px;
+    width: 100%;
+    padding: 60px 80px;
+  }
+
+  .mockup-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .phones-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    align-items: end;
+  }
+
+  .phone-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .phone-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--strava-orange);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .step-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .phone-frame {
+    width: 100%;
+    max-width: 200px;
+    aspect-ratio: 9/19;
+    border-radius: 28px;
+    border: 2px solid #2a2a2a;
+    background: #111;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+
+  .phone-frame::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 6px;
+    background: #1a1a1a;
+    border-radius: 3px;
+    z-index: 10;
+  }
+
+  /* Phone Screen 1: Discovery */
+  .screen-discovery {
+    width: 100%;
+    height: 100%;
+    background: #1c1c1e;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, sans-serif;
+  }
+
+  .phone-statusbar {
+    height: 28px;
+    background: #1c1c1e;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    margin-top: 8px;
+  }
+
+  .phone-statusbar .time {
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .phone-statusbar .icons {
+    font-size: 9px;
+    color: white;
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .phone-nav {
+    padding: 8px 12px 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .phone-nav .title {
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .phone-nav .icons-right {
+    display: flex;
+    gap: 8px;
+  }
+
+  .phone-nav .icons-right span {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .feed-item {
+    background: #252525;
+    margin: 4px 8px;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .feed-user {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px 4px;
+  }
+
+  .feed-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    color: white;
+  }
+
+  .feed-user-info .name {
+    font-size: 8px;
+    font-weight: 600;
+    color: white;
+  }
+
+  .feed-user-info .time {
+    font-size: 7px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  .feed-activity-img {
+    width: 100%;
+    height: 44px;
+    background: linear-gradient(135deg, #2a4a2a, #1a3a1a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .challenge-feed-card {
+    background: linear-gradient(135deg, #5A000D, #8C0015);
+    margin: 4px 8px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .challenge-feed-card .sponsored-tag {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0,0,0,0.4);
+    font-size: 6px;
+    color: rgba(255,255,255,0.7);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  .challenge-feed-inner {
+    padding: 8px 10px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .mini-badge {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+
+  .challenge-feed-text .ctitle {
+    font-size: 8px;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+
+  .challenge-feed-text .cdesc {
+    font-size: 7px;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.3;
+    margin-bottom: 5px;
+  }
+
+  .join-btn-mini {
+    display: inline-block;
+    background: var(--strava-orange);
+    color: white;
+    font-size: 7px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Screen 2: Challenge Detail */
+  .screen-detail {
+    width: 100%;
+    height: 100%;
+    background: #1c1c1e;
+  }
+
+  .detail-hero {
+    width: 100%;
+    height: 55px;
+    background: linear-gradient(135deg, #5A000D, #8C0015);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .detail-body {
+    padding: 8px 10px;
+  }
+
+  .detail-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 3px;
+    line-height: 1.2;
+  }
+
+  .detail-desc {
+    font-size: 7px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+
+  .detail-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .detail-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 7px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .detail-meta-icon { font-size: 8px; }
+
+  .join-cta-btn {
+    width: 100%;
+    background: var(--strava-orange);
+    color: white;
+    font-size: 8px;
+    font-weight: 700;
+    text-align: center;
+    padding: 6px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* Screen 3: In Progress */
+  .screen-progress {
+    width: 100%;
+    height: 100%;
+    background: #1c1c1e;
+    padding: 8px 10px;
+    padding-top: 36px;
+  }
+
+  .progress-challenge-header {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .progress-badge-small {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 4px;
+  }
+
+  .progress-title {
+    font-size: 8px;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .progress-bar-container {
+    margin: 10px 0;
+  }
+
+  .progress-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 7px;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 4px;
+  }
+
+  .progress-bar-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--crimson), var(--coral));
+    width: 62%;
+    position: relative;
+  }
+
+  .progress-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin: 8px 0;
+  }
+
+  .progress-stat {
+    background: rgba(255,255,255,0.05);
+    border-radius: 6px;
+    padding: 6px 4px;
+    text-align: center;
+  }
+
+  .progress-stat .pval {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--coral);
+  }
+
+  .progress-stat .plabel {
+    font-size: 6px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 1px;
+  }
+
+  .leaderboard-mini {
+    margin-top: 6px;
+  }
+
+  .leaderboard-mini .lb-title {
+    font-size: 7px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .lb-rank {
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--strava-orange);
+    width: 10px;
+  }
+
+  .lb-avatar-mini {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #444;
+    font-size: 6px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .lb-name {
+    font-size: 7px;
+    color: white;
+    flex: 1;
+  }
+
+  .lb-mins {
+    font-size: 7px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* Screen 4: Complete */
+  .screen-complete {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, #5A000D 0%, #1A0008 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 36px 12px 12px;
+    text-align: center;
+  }
+
+  .complete-confetti {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .complete-title {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--coral);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 2px;
+  }
+
+  .complete-subtitle {
+    font-size: 8px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .complete-badge-large {
+    width: 64px;
+    height: 64px;
+    margin: 8px auto;
+  }
+
+  .complete-stats {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0;
+  }
+
+  .complete-stat {
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 6px 10px;
+    text-align: center;
+  }
+
+  .complete-stat .v {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--coral);
+  }
+
+  .complete-stat .l {
+    font-size: 6px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 1px;
+  }
+
+  .redeem-btn {
+    width: 100%;
+    background: var(--strava-orange);
+    color: white;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 7px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 6px;
+  }
+
+  .discount-code-display {
+    margin-top: 6px;
+    background: rgba(240,128,112,0.15);
+    border: 1px dashed rgba(240,128,112,0.4);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--coral);
+    letter-spacing: 0.1em;
+  }
+
+  /* ==========================================
+     SLIDE 7: THE NUMBERS
+  ========================================== */
+  .slide-numbers {
+    background: var(--cream);
+  }
+
+  .slide-numbers .inner {
+    max-width: 1100px;
+    width: 100%;
+    padding: 80px;
+  }
+
+  .slide-numbers .section-label { color: var(--crimson); }
+  .slide-numbers .slide-title { color: var(--black); }
+
+  .numbers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .number-card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px 28px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .number-card.featured {
+    background: var(--crimson);
+    grid-column: span 1;
+  }
+
+  .number-card.featured .num { color: var(--coral); }
+  .number-card.featured .label { color: rgba(255,255,255,0.7); }
+  .number-card.featured .context { color: rgba(255,255,255,0.5); }
+
+  .number-card .num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 600;
+    color: var(--crimson);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .number-card .label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--black);
+    margin-bottom: 8px;
+  }
+
+  .number-card .context {
+    font-size: 12px;
+    color: rgba(0,0,0,0.45);
+    line-height: 1.5;
+  }
+
+  .number-card .check-mark {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(140,0,21,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--crimson);
+  }
+
+  .number-card.featured .check-mark {
+    background: rgba(240,128,112,0.2);
+    color: var(--coral);
+  }
+
+  .funnel-diagram {
+    margin-top: 40px;
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+
+  .funnel-step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+  }
+
+  .funnel-step::after {
+    content: '→';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(0,0,0,0.2);
+    font-size: 18px;
+  }
+
+  .funnel-step:last-child::after { display: none; }
+
+  .funnel-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--crimson);
+    margin-bottom: 4px;
+  }
+
+  .funnel-label {
+    font-size: 11px;
+    color: rgba(0,0,0,0.5);
+    line-height: 1.3;
+  }
+
+  /* ==========================================
+     SLIDE 8: INVESTMENT
+  ========================================== */
+  .slide-investment {
+    background: #0A0A0A;
+  }
+
+  .slide-investment .inner {
+    max-width: 1100px;
+    width: 100%;
+    padding: 80px;
+  }
+
+  .investment-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .packages-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.2fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  .package-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+
+  .package-card.recommended {
+    background: linear-gradient(135deg, rgba(140,0,21,0.3), rgba(90,0,13,0.4));
+    border-color: var(--coral);
+    transform: scale(1.03);
+  }
+
+  .package-card.recommended .package-tag {
+    display: inline-block;
+    background: var(--coral);
+    color: var(--crimson-deep);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 12px;
+  }
+
+  .package-card:not(.recommended) .package-tag { display: none; }
+
+  .package-market {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 8px;
+  }
+
+  .package-duration {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  .package-price {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--strava-orange);
+    margin-bottom: 16px;
+  }
+
+  .package-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 12px 0;
+  }
+
+  .package-metric {
+    margin-bottom: 8px;
+  }
+
+  .package-metric .val {
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+  }
+
+  .package-metric.recommended-metric .val {
+    color: var(--coral);
+  }
+
+  .package-metric .lbl {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 1px;
+  }
+
+  .add-ons-section {
+    margin-top: 32px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 24px 28px;
+  }
+
+  .add-ons-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 16px;
+  }
+
+  .add-ons-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .add-on-item {
+    text-align: center;
+  }
+
+  .add-on-item .name {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 3px;
+    line-height: 1.3;
+  }
+
+  .add-on-item .price {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--strava-orange);
+  }
+
+  /* ==========================================
+     SLIDE 9: CASE STUDIES
+  ========================================== */
+  .slide-cases {
+    background: #0D0D0D;
+  }
+
+  .slide-cases .inner {
+    max-width: 1100px;
+    width: 100%;
+    padding: 80px;
+  }
+
+  .cases-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .cases-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+  }
+
+  .case-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .case-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--crimson), var(--coral));
+  }
+
+  .case-brand {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 4px;
+  }
+
+  .case-campaign {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 20px;
+  }
+
+  .case-results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .case-result-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .case-result-val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--strava-orange);
+    line-height: 1;
+  }
+
+  .case-result-val.green { color: #4ade80; }
+
+  .case-result-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.3;
+  }
+
+  .case-relevance {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.5;
+  }
+
+  .case-relevance strong { color: var(--coral); font-weight: 500; }
+
+  /* ==========================================
+     SLIDE 10: KPI SUMMARY
+  ========================================== */
+  .slide-kpi {
+    background: linear-gradient(135deg, #1A0008 0%, #5A000D 50%, #8C0015 100%);
+    position: relative;
+  }
+
+  .slide-kpi .inner {
+    max-width: 1000px;
+    width: 100%;
+    padding: 80px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    margin-top: 48px;
+  }
+
+  .kpi-big-card {
+    background: rgba(245,239,230,0.06);
+    border: 1px solid rgba(245,239,230,0.12);
+    border-radius: 24px;
+    padding: 40px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi-big-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--coral), transparent);
+  }
+
+  .kpi-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+  }
+
+  .kpi-big-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 60px;
+    font-weight: 600;
+    color: var(--coral);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .kpi-big-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+
+  .kpi-big-context {
+    font-size: 12px;
+    color: rgba(245,239,230,0.5);
+    line-height: 1.5;
+  }
+
+  .roi-banner {
+    margin-top: 32px;
+    background: rgba(240,128,112,0.12);
+    border: 1px solid rgba(240,128,112,0.25);
+    border-radius: 16px;
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 48px;
+  }
+
+  .roi-item { text-align: center; }
+
+  .roi-val {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 600;
+    color: var(--coral);
+  }
+
+  .roi-label {
+    font-size: 12px;
+    color: rgba(245,239,230,0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .roi-divider {
+    width: 1px;
+    height: 50px;
+    background: rgba(240,128,112,0.3);
+  }
+
+  /* ==========================================
+     SLIDE 11: NEXT STEPS
+  ========================================== */
+  .slide-nextsteps {
+    background: var(--cream);
+  }
+
+  .slide-nextsteps .inner {
+    max-width: 900px;
+    width: 100%;
+    padding: 80px;
+    text-align: center;
+  }
+
+  .slide-nextsteps .section-label { color: var(--crimson); }
+  .slide-nextsteps .slide-title { color: var(--black); }
+
+  .steps-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 48px;
+    text-align: left;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    position: relative;
+    padding-bottom: 32px;
+  }
+
+  .timeline-item:last-child { padding-bottom: 0; }
+
+  .timeline-item::after {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 40px;
+    width: 2px;
+    height: calc(100% - 40px);
+    background: linear-gradient(180deg, rgba(140,0,21,0.3), rgba(140,0,21,0.0));
+  }
+
+  .timeline-item:last-child::after { display: none; }
+
+  .timeline-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--crimson);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .timeline-content .step-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--black);
+    margin-bottom: 4px;
+  }
+
+  .timeline-content .step-body {
+    font-size: 14px;
+    color: rgba(0,0,0,0.5);
+    line-height: 1.5;
+  }
+
+  .timeline-content .step-timing {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--crimson);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .contact-box {
+    margin-top: 48px;
+    background: var(--crimson);
+    border-radius: 20px;
+    padding: 36px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+  }
+
+  .contact-box .label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--coral);
+    margin-bottom: 8px;
+  }
+
+  .contact-box .tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: white;
+    font-style: italic;
+  }
+
+  .contact-box .love-life-cta {
+    background: var(--coral);
+    color: var(--crimson-deep);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 16px 32px;
+    border-radius: 100px;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* Badge SVG */
+  .badge-svg text { font-family: 'Inter', sans-serif; }
+
+  /* ==========================================
+     ENHANCED APP MOCKUP SLIDE
+  ========================================== */
+  .slide-appmockup {
+    background: #060606;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  .mockup-slide-header {
+    width: 100%;
+    padding: 20px 52px 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  .mockup-slide-header .ms-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--strava-orange);
+  }
+
+  .mockup-slide-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(20px, 2.2vw, 32px);
+    font-weight: 400;
+    color: white;
+    line-height: 1;
+  }
+
+  .mockup-slide-header h2 em { font-style: italic; color: var(--coral); }
+
+  .phones-outer {
+    width: 100%;
+    padding: 0 28px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .flow-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .flow-row-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .frh-tag {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--strava-orange);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .frh-name {
+    font-size: 9px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .frh-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .phones-row-6 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .phone-col-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .step-tag {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .step-circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--strava-orange);
+    font-size: 8px;
+    font-weight: 800;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-name {
+    font-size: 9px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  /* ── iPhone shell ── */
+  .iphone {
+    width: 100%;
+    max-width: 174px;
+    aspect-ratio: 390/844;
+    border-radius: 32px;
+    border: 2px solid #2C2C2E;
+    background: #000;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 0 1px #111, 0 20px 50px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.07);
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, 'Inter', sans-serif;
+  }
+
+  .iphone::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32%;
+    height: 6%;
+    background: #000;
+    border-radius: 20px;
+    z-index: 100;
+  }
+
+  /* Status bar */
+  .sb {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12% 7% 1%;
+    flex-shrink: 0;
+    background: #1C1C1E;
+  }
+
+  .sb-time { font-size: 7px; font-weight: 700; color: white; letter-spacing: -0.01em; }
+
+  .sb-right {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .sb-dot { width: 5px; height: 5px; background: white; border-radius: 50%; opacity: 0.7; }
+  .sb-dot:nth-child(2) { opacity: 0.5; }
+  .sb-dot:nth-child(3) { width: 8px; height: 5px; border-radius: 2px; opacity: 0.9; }
+
+  /* Bottom nav */
+  .bnav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 5px 0 9px;
+    background: #1C1C1E;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+  }
+
+  .bnav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    opacity: 0.4;
+    min-width: 22px;
+  }
+
+  .bnav-item.active { opacity: 1; }
+
+  .bnav-icon { font-size: 10px; line-height: 1; }
+
+  .bnav-label {
+    font-size: 5px;
+    font-weight: 500;
+    color: white;
+    letter-spacing: 0.03em;
+  }
+
+  .bnav-item.active .bnav-label { color: var(--strava-orange); }
+
+  .bnav-record {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--strava-orange);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1px;
+  }
+
+  .bnav-record-inner {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+
+  /* Screen wrapper */
+  .screen-body {
+    flex: 1;
+    overflow: hidden;
+    background: #1C1C1E;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Top nav bar inside screens */
+  .s-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 8px 4px;
+    background: #1C1C1E;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+  }
+
+  .s-topbar .stb-back { font-size: 7.5px; color: var(--strava-orange); font-weight: 600; }
+  .s-topbar .stb-title { font-size: 9px; font-weight: 700; color: white; }
+  .s-topbar .stb-icon { font-size: 9px; color: rgba(255,255,255,0.6); }
+
+  /* Tab row */
+  .tab-row {
+    display: flex;
+    padding: 0 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+  }
+
+  .tab-pill {
+    font-size: 7.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.38);
+    padding: 5px 8px 4px;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+
+  .tab-pill.active { color: white; border-bottom-color: var(--strava-orange); }
+
+  /* Filter chips */
+  .filter-row {
+    display: flex;
+    gap: 4px;
+    padding: 5px 8px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .filter-chip {
+    font-size: 6.5px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+
+  .filter-chip.on { background: white; color: #000; border-color: white; }
+
+  /* Challenge Gallery Card */
+  .cg-card {
+    margin: 4px 8px;
+    border-radius: 9px;
+    overflow: hidden;
+    background: #2C2C2E;
+    flex-shrink: 0;
+  }
+
+  .cg-hero {
+    width: 100%;
+    height: 44px;
+    background: linear-gradient(135deg, #2A0008, #7A0012 60%, #8C0015);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+  }
+
+  .cg-hero .sponsored-tag {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    background: rgba(0,0,0,0.45);
+    font-size: 5.5px;
+    color: rgba(255,255,255,0.65);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .cg-body { padding: 5px 8px 7px; }
+
+  .cg-title {
+    font-size: 8.5px;
+    font-weight: 800;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+
+  .cg-sub {
+    font-size: 6.5px;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+
+  .cg-meta-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+
+  .cg-meta-item {
+    font-size: 6px;
+    color: rgba(255,255,255,0.4);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .cg-join {
+    width: 100%;
+    background: var(--strava-orange);
+    color: white;
+    font-size: 7.5px;
+    font-weight: 800;
+    text-align: center;
+    padding: 5px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .past-header {
+    font-size: 6.5px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.28);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 8px 2px;
+    flex-shrink: 0;
+  }
+
+  .past-cg-card {
+    margin: 2px 8px;
+    border-radius: 7px;
+    background: #232323;
+    padding: 5px 7px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    opacity: 0.6;
+  }
+
+  .past-cg-card .pcc-name { font-size: 7px; color: rgba(255,255,255,0.55); }
+  .past-cg-card .pcc-date { font-size: 6px; color: rgba(255,255,255,0.28); }
+
+  /* Challenge Detail Screen */
+  .det-hero {
+    width: 100%;
+    height: 76px;
+    background: linear-gradient(160deg, #1A0005 0%, #6A000F 55%, #8C0015 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .det-hero .participants-count {
+    position: absolute;
+    bottom: 5px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 6px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .det-hero .participants-count strong { color: var(--strava-orange); }
+
+  .det-body { padding: 8px 9px 6px; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+  .det-name { font-size: 10px; font-weight: 800; color: white; line-height: 1.2; margin-bottom: 5px; }
+
+  .det-desc { font-size: 7px; color: rgba(255,255,255,0.55); line-height: 1.45; margin-bottom: 7px; }
+
+  .det-info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    margin-bottom: 4px;
+  }
+
+  .det-info-icon { font-size: 8px; flex-shrink: 0; }
+  .det-info-text { font-size: 6.5px; color: rgba(255,255,255,0.55); line-height: 1.35; }
+
+  .det-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 6px 0; }
+
+  .det-reward-box {
+    background: rgba(240,128,112,0.07);
+    border: 1px solid rgba(240,128,112,0.22);
+    border-radius: 6px;
+    padding: 5px 7px;
+    margin-bottom: 7px;
+  }
+
+  .det-reward-box .drb-label { font-size: 5.5px; font-weight: 700; color: var(--coral); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+  .det-reward-box .drb-val { font-size: 7px; color: white; line-height: 1.35; font-weight: 600; }
+
+  .big-join {
+    width: 100%;
+    background: var(--strava-orange);
+    color: white;
+    font-size: 8.5px;
+    font-weight: 800;
+    text-align: center;
+    padding: 7px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-top: auto;
+  }
+
+  /* Feed Screen */
+  .feed-item-wrap {
+    padding: 6px 9px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-shrink: 0;
+  }
+
+  .feed-user-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 3px;
+  }
+
+  .feed-av {
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .feed-uname { font-size: 7.5px; font-weight: 700; color: white; }
+  .feed-utime { font-size: 6px; color: rgba(255,255,255,0.35); }
+
+  .feed-map-strip {
+    width: 100%;
+    height: 34px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #1a2a1a, #0a160a);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feed-route-line {
+    position: absolute;
+    width: 70%;
+    height: 2px;
+    background: var(--strava-orange);
+    opacity: 0.7;
+    border-radius: 1px;
+    transform: rotate(-8deg);
+  }
+
+  .feed-stat-row { display: flex; gap: 12px; margin-bottom: 4px; }
+  .feed-stat .fsv { font-size: 8px; font-weight: 700; color: white; }
+  .feed-stat .fsl { font-size: 5.5px; color: rgba(255,255,255,0.35); }
+
+  .feed-actions-row { display: flex; gap: 10px; }
+  .feed-act { font-size: 7px; color: rgba(255,255,255,0.35); }
+
+  /* Challenge join notification in feed */
+  .feed-challenge-notif {
+    margin: 4px 8px;
+    border-radius: 9px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1E0006, #4A0010);
+    flex-shrink: 0;
+  }
+
+  .fcn-top {
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .fcn-av {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 6px;
+    font-weight: 700;
+    color: white;
+  }
+
+  .fcn-msg { font-size: 6.5px; color: rgba(255,255,255,0.7); line-height: 1.3; }
+  .fcn-msg strong { color: white; }
+
+  .fcn-card {
+    background: rgba(0,0,0,0.2);
+    padding: 6px 8px 7px;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+  }
+
+  .fcn-info .fci-title { font-size: 8px; font-weight: 800; color: white; margin-bottom: 2px; line-height: 1.2; }
+  .fcn-info .fci-desc { font-size: 6px; color: rgba(255,255,255,0.5); line-height: 1.3; margin-bottom: 5px; }
+
+  .fcn-join {
+    display: inline-block;
+    background: var(--strava-orange);
+    color: white;
+    font-size: 7px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* Progress Screen */
+  .prog-hero {
+    background: linear-gradient(160deg, #12000A, #5A000D 70%);
+    padding: 7px 10px 9px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .prog-badge-wrap { width: 40px; height: 40px; margin: 0 auto 4px; }
+
+  .prog-ch-name { font-size: 7.5px; font-weight: 700; color: white; line-height: 1.2; margin-bottom: 6px; }
+
+  .prog-bar-outer {
+    background: rgba(255,255,255,0.11);
+    border-radius: 4px;
+    height: 5px;
+    overflow: hidden;
+    margin-bottom: 2px;
+  }
+
+  .prog-bar-inner {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #8C0015, var(--coral));
+    width: 62%;
+  }
+
+  .prog-bar-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 5.5px;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .prog-bar-meta .pm-pct { color: var(--coral); font-weight: 700; }
+
+  .prog-stats-3 {
+    display: flex;
+    justify-content: space-around;
+    padding: 7px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    flex-shrink: 0;
+  }
+
+  .p3-item { text-align: center; }
+  .p3-item .p3v { font-size: 14px; font-weight: 800; color: var(--coral); line-height: 1; }
+  .p3-item .p3l { font-size: 5.5px; color: rgba(255,255,255,0.38); margin-top: 1px; }
+
+  .prog-section-head {
+    font-size: 6.5px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 6px 9px 3px;
+    flex-shrink: 0;
+  }
+
+  .prog-friend {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    flex-shrink: 0;
+  }
+
+  .pf-rank { font-size: 7px; font-weight: 800; color: var(--strava-orange); width: 10px; }
+
+  .pf-av {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 5.5px; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+
+  .pf-name { flex: 1; font-size: 7px; color: white; }
+  .pf-name.you { color: var(--coral); font-weight: 700; }
+
+  .pf-bar { flex: 1.5; }
+  .pf-bar-track { height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+  .pf-bar-fill { height: 100%; background: var(--strava-orange); border-radius: 2px; }
+  .pf-mins { font-size: 6px; color: rgba(255,255,255,0.4); white-space: nowrap; }
+
+  /* Completion Screen */
+  .comp-overlay {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 10px 5px;
+    text-align: center;
+    background: linear-gradient(180deg, #1A0006 0%, #0A0A0A 100%);
+    overflow: hidden;
+  }
+
+  .co-confetti { font-size: 13px; margin-bottom: 2px; }
+
+  .co-eyebrow {
+    font-size: 6.5px;
+    font-weight: 800;
+    color: var(--strava-orange);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .co-headline { font-size: 8.5px; font-weight: 700; color: white; line-height: 1.25; margin-bottom: 5px; }
+
+  .co-badge { width: 54px; height: 54px; margin: 0 auto 5px; }
+
+  .co-stats { display: flex; gap: 7px; margin-bottom: 6px; }
+
+  .co-stat {
+    background: rgba(255,255,255,0.06);
+    border-radius: 6px;
+    padding: 5px 8px;
+    text-align: center;
+  }
+
+  .co-stat .cosv { font-size: 13px; font-weight: 800; color: var(--coral); }
+  .co-stat .cosl { font-size: 5.5px; color: rgba(255,255,255,0.38); margin-top: 1px; }
+
+  .co-divider { height: 1px; background: rgba(255,255,255,0.07); width: 100%; margin-bottom: 6px; }
+
+  .co-reward-preview {
+    background: rgba(240,128,112,0.07);
+    border: 1px solid rgba(240,128,112,0.2);
+    border-radius: 6px;
+    padding: 5px 8px;
+    width: 100%;
+    margin-bottom: 6px;
+    text-align: left;
+  }
+
+  .co-reward-preview .corp-label { font-size: 5.5px; font-weight: 700; color: var(--coral); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px; }
+  .co-reward-preview .corp-val { font-size: 7px; color: white; line-height: 1.35; }
+
+  .co-redeem {
+    width: 100%;
+    background: var(--strava-orange);
+    color: white;
+    font-size: 7.5px;
+    font-weight: 800;
+    text-align: center;
+    padding: 6px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  /* Reward Landing Screen */
+  .rl-header {
+    background: linear-gradient(135deg, #120004, #5A000D);
+    padding: 8px 10px 7px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .rl-im8 { font-size: 16px; font-weight: 900; color: white; font-family: Georgia, serif; letter-spacing: 0.06em; }
+  .rl-tagline { font-size: 6px; color: var(--coral); font-style: italic; }
+
+  .rl-body { padding: 7px 9px; flex: 1; overflow: hidden; }
+
+  .rl-unlock { font-size: 9px; font-weight: 800; color: white; text-align: center; margin-bottom: 7px; }
+
+  .rl-card {
+    background: #2A2A2A;
+    border-radius: 7px;
+    padding: 6px 8px;
+    margin-bottom: 5px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .rl-card.prize-card { border-color: var(--coral); background: rgba(240,128,112,0.07); }
+
+  .rl-card-label { font-size: 5.5px; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+  .rl-card-label.hl { color: var(--coral); }
+
+  .rl-card-val { font-size: 9.5px; font-weight: 800; color: white; margin-bottom: 2px; line-height: 1.2; }
+  .rl-card-val.prize { color: var(--coral); }
+
+  .rl-card-sub { font-size: 6px; color: rgba(255,255,255,0.38); line-height: 1.35; }
+
+  .rl-code-strip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(240,128,112,0.08);
+    border: 1.5px dashed rgba(240,128,112,0.4);
+    border-radius: 5px;
+    padding: 4px 7px;
+    margin-top: 4px;
+  }
+
+  .rl-code-val { font-size: 10px; font-weight: 900; color: var(--coral); letter-spacing: 0.12em; flex: 1; }
+  .rl-code-copy { font-size: 5.5px; color: var(--strava-orange); font-weight: 700; }
+
+  .rl-f1-row { display: flex; align-items: center; gap: 5px; margin-top: 4px; }
+  .rl-f1-emoji { font-size: 14px; }
+  .rl-f1-txt { font-size: 6.5px; color: rgba(255,255,255,0.55); line-height: 1.35; }
+  .rl-f1-txt strong { color: white; }
+
+  .rl-shop-btn {
+    width: 100%;
+    background: var(--strava-orange);
+    color: white;
+    font-size: 7.5px;
+    font-weight: 800;
+    text-align: center;
+    padding: 6px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-top: 7px;
+  }
+
+  .rl-terms { font-size: 5px; color: rgba(255,255,255,0.22); text-align: center; margin-top: 4px; line-height: 1.4; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .slide-platform .inner,
+    .slide-audience .inner,
+    .slide-concept .inner { grid-template-columns: 1fr; gap: 40px; }
+    .phones-row { grid-template-columns: repeat(2, 1fr); }
+    .numbers-grid { grid-template-columns: 1fr; }
+    .packages-grid { grid-template-columns: 1fr 1fr; }
+    .cases-grid { grid-template-columns: 1fr; }
+    .kpi-grid { grid-template-columns: 1fr; }
+    .adproblem-grid { grid-template-columns: repeat(2, 1fr); }
+    .add-ons-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation Dots -->
+<nav class="nav" id="navDots"></nav>
+<div class="slide-counter" id="slideCounter">01 / 11</div>
+<div class="arrow-nav">
+  <button class="arrow-btn" onclick="prevSlide()">↑</button>
+  <button class="arrow-btn" onclick="nextSlide()">↓</button>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- ==========================================
+       SLIDE 1: COVER
+  ========================================== -->
+  <section class="slide slide-cover">
+    <div class="cover-noise"></div>
+    <div class="cover-grid"></div>
+    <div class="cover-content">
+      <div class="partnership-badge">
+        <span class="im8-logo-text">IM8</span>
+        <div class="x-divider"></div>
+        <span class="strava-logo-text">STRAVA</span>
+      </div>
+      <h1 class="cover-headline">
+        <em>Love Life.</em><br>Move More.
+      </h1>
+      <p class="cover-sub">Sponsored Challenge Activation Proposal · 2026</p>
+      <div class="cover-kpi-strip">
+        <div class="kpi-item">
+          <div class="kpi-num">1M+</div>
+          <div class="kpi-label">Athletes Reached</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-num">100M+</div>
+          <div class="kpi-label">Impressions</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-num">100K</div>
+          <div class="kpi-label">New Customers</div>
+        </div>
+        <div class="kpi-item">
+          <div class="kpi-num">10:1</div>
+          <div class="kpi-label">Target ROI</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       SLIDE 2: THE PLATFORM
+  ========================================== -->
+  <section class="slide slide-platform">
+    <div class="inner">
+      <div>
+        <div class="section-label">The Platform</div>
+        <h2 class="slide-title">180 million athletes.<br><em>Zero interruptions.</em></h2>
+        <p class="slide-body">Strava is the world's largest active lifestyle platform. Unlike any other media channel, athletes come here to be motivated — meaning IM8 can show up as an inspiration, not an intrusion.</p>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="num">180M</div>
+            <div class="label">Athletes worldwide in 185 countries</div>
+          </div>
+          <div class="stat-card">
+            <div class="num">51M</div>
+            <div class="label">Activities uploaded every single week</div>
+          </div>
+          <div class="stat-card">
+            <div class="num">75%</div>
+            <div class="label">Brand recall — highest of any platform</div>
+          </div>
+          <div class="stat-card">
+            <div class="num">10:1</div>
+            <div class="label">Proven driven ROI for brand partners</div>
+          </div>
+        </div>
+      </div>
+      <div class="platform-visual">
+        <div class="platform-card">
+          <div class="platform-icon">🧠</div>
+          <div>
+            <div class="platform-card-title">Ad-Free. Brand-Friendly.</div>
+            <div class="platform-card-body">Strava carries zero display ads. Sponsored Challenges are native, opt-in experiences that athletes genuinely value — making IM8's presence feel like a partnership, not a promotion.</div>
+          </div>
+        </div>
+        <div class="platform-card">
+          <div class="platform-icon">⚡</div>
+          <div>
+            <div class="platform-card-title">Every 19 Seconds, a Goal is Achieved</div>
+            <div class="platform-card-body">Athletes complete goals constantly on Strava. A Sponsored Challenge puts IM8 at the centre of that moment of personal achievement — the highest-value touchpoint in any athlete's day.</div>
+          </div>
+        </div>
+        <div class="platform-card">
+          <div class="platform-icon">📱</div>
+          <div>
+            <div class="platform-card-title">Every 2 Minutes In-App = 1 Hour Moving</div>
+            <div class="platform-card-body">Strava's engagement ratio is unmatched. Athletes spend minutes on the app but their association with it lasts hours — meaning IM8's brand exposure extends far beyond the screen.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       SLIDE 3: THE AUDIENCE
+  ========================================== -->
+  <section class="slide slide-audience">
+    <div class="inner">
+      <div>
+        <div class="section-label">Why Strava Athletes Are IM8's Customers</div>
+        <h2 class="slide-title">The most health-conscious, premium-spending audience<br><em>on the internet.</em></h2>
+        <p class="slide-body">Strava's 180M athletes aren't just active — they're aspirational, disciplined, and health-obsessed. They invest in their performance, their recovery, and their longevity. That's exactly the mindset IM8 was built for.</p>
+        <div class="audience-stat-row">
+          <div class="audience-bar">
+            <div class="audience-bar-pct">94%</div>
+            <div class="audience-bar-text">Top socioeconomic group — able and willing to invest in premium health products</div>
+          </div>
+          <div class="audience-bar">
+            <div class="audience-bar-pct">87%</div>
+            <div class="audience-bar-text">Self-identified premium buyers — they don't compromise on quality</div>
+          </div>
+          <div class="audience-bar">
+            <div class="audience-bar-pct">52%</div>
+            <div class="audience-bar-text">Have purchased from a brand they discovered on Strava</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="audience-highlight-box">
+          <div class="big-num">34.9M</div>
+          <p>Addressable athletes across the UK (14.3M) and USA (20.6M) — IM8's two priority markets</p>
+          <div class="divider-line"></div>
+          <p>This is the addressable pool for our Sponsored Challenge. A growing Gen Z cohort (1 in 3 Strava users) makes this IM8's best channel to reach the next generation of health-conscious consumers.</p>
+          <div class="audience-market-split">
+            <div class="market-card">
+              <div class="mnum">14.3M</div>
+              <div class="mlabel">🇬🇧 United Kingdom</div>
+            </div>
+            <div class="market-card">
+              <div class="mnum">20.6M</div>
+              <div class="mlabel">🇺🇸 United States</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       SLIDE 4: THE ADVERTISING PROBLEM
+  ========================================== -->
+  <section class="slide slide-adproblem">
+    <div class="inner">
+      <div class="section-label" style="text-align:center">The Problem With Traditional Digital Advertising</div>
+      <h2 class="slide-title" style="text-align:center; font-size: clamp(32px, 3.5vw, 52px);">Your ads are being <em>ignored, blocked,</em><br>and actively resented.</h2>
+      <div class="adproblem-grid">
+        <div class="adproblem-card">
+          <div class="pct">70%</div>
+          <div class="desc">of consumers say digital ads are annoying and disruptive</div>
+        </div>
+        <div class="adproblem-card">
+          <div class="pct">61%</div>
+          <div class="desc">of Gen Z use ad-blockers — your core longevity audience</div>
+        </div>
+        <div class="adproblem-card">
+          <div class="pct">99%</div>
+          <div class="desc">of users skip pre-roll ads as soon as possible</div>
+        </div>
+        <div class="adproblem-card">
+          <div class="pct">72%</div>
+          <div class="desc">say bad ads actively hurt their perception of the brand</div>
+        </div>
+      </div>
+      <div class="solution-banner">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--coral); margin-bottom: 12px;">The Strava Difference</div>
+          <div class="solution-banner-text">Strava is <em>ad-free</em> but not brand-free.<br>IM8 doesn't interrupt the athlete — we <em>motivate</em> them.</div>
+        </div>
+        <div class="solution-banner-divider"></div>
+        <div class="solution-banner-stat">
+          <div class="big">75%</div>
+          <div class="small">On-Platform<br>Brand Recall</div>
+        </div>
+        <div class="solution-banner-divider"></div>
+        <div class="solution-banner-stat">
+          <div class="big">+5%</div>
+          <div class="small">Increase in<br>Activities Logged</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       SLIDE 5: THE CHALLENGE CONCEPT
+  ========================================== -->
+  <section class="slide slide-concept">
+    <div class="inner">
+      <div>
+        <!-- Challenge Badge SVG -->
+        <svg class="challenge-badge-large" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="badgeBg" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#8C0015"/>
+              <stop offset="100%" stop-color="#3A0009"/>
+            </radialGradient>
+            <filter id="shadow">
+              <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.5)"/>
+            </filter>
+          </defs>
+          <!-- Outer ring -->
+          <circle cx="130" cy="130" r="125" fill="url(#badgeBg)" filter="url(#shadow)"/>
+          <circle cx="130" cy="130" r="122" fill="none" stroke="#F08070" stroke-width="1.5" stroke-dasharray="6 4"/>
+          <circle cx="130" cy="130" r="115" fill="none" stroke="rgba(240,128,112,0.2)" stroke-width="1"/>
+          <!-- IM8 text large -->
+          <text x="130" y="108" text-anchor="middle" font-family="Georgia,serif" font-size="48" font-weight="bold" fill="#F5EFE6" letter-spacing="6">IM8</text>
+          <!-- Divider line -->
+          <line x1="70" y1="120" x2="190" y2="120" stroke="rgba(240,128,112,0.4)" stroke-width="1"/>
+          <!-- LOVE LIFE text -->
+          <text x="130" y="148" text-anchor="middle" font-family="Georgia,serif" font-size="18" fill="#F08070" letter-spacing="4" font-style="italic">Love Life</text>
+          <!-- CHALLENGE text -->
+          <text x="130" y="170" text-anchor="middle" font-family="'Inter',sans-serif" font-size="11" fill="rgba(245,239,230,0.7)" letter-spacing="4" font-weight="600">CHALLENGE</text>
+          <!-- 120 mins arc text concept -->
+          <text x="130" y="198" text-anchor="middle" font-family="'Inter',sans-serif" font-size="10" fill="rgba(240,128,112,0.6)" letter-spacing="2">120 MINS · 30 DAYS</text>
+          <!-- Star/pulse elements -->
+          <circle cx="68" cy="130" r="3" fill="#F08070" opacity="0.7"/>
+          <circle cx="192" cy="130" r="3" fill="#F08070" opacity="0.7"/>
+        </svg>
+
+        <div class="challenge-details-list">
+          <div class="challenge-detail">
+            <div class="challenge-detail-icon">⏱</div>
+            <div>
+              <div class="challenge-detail-label">Challenge Type</div>
+              <div class="challenge-detail-value">Duration — complete 120 minutes of any activity</div>
+            </div>
+          </div>
+          <div class="challenge-detail">
+            <div class="challenge-detail-icon">📅</div>
+            <div>
+              <div class="challenge-detail-label">Duration</div>
+              <div class="challenge-detail-value">30-day window — accessible to all fitness levels</div>
+            </div>
+          </div>
+          <div class="challenge-detail">
+            <div class="challenge-detail-icon">🏃</div>
+            <div>
+              <div class="challenge-detail-label">Qualifying Activities</div>
+              <div class="challenge-detail-value">Run, Walk, Cycle, Swim, Hike, Gym — all activities count</div>
+            </div>
+          </div>
+          <div class="challenge-detail">
+            <div class="challenge-detail-icon">🌍</div>
+            <div>
+              <div class="challenge-detail-label">Target Market</div>
+              <div class="challenge-detail-value">Global — all 180M Strava athletes eligible to join</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="concept-right">
+        <div class="section-label">The Challenge Concept</div>
+        <div class="challenge-name-display">IM8 Love Life<br>120 Challenge</div>
+        <div class="challenge-tagline">Move. Complete. Love Life.</div>
+        <p class="slide-body">Log 120 minutes of any activity over 30 days and unlock your first step towards a longer, healthier life. Designed to be accessible enough for a first-time walker, motivating enough for a seasoned triathlete — because longevity is for everyone.</p>
+        <p class="slide-body">Every minute of movement reinforces what IM8 stands for: the belief that small, consistent actions compound into a life you love. Complete the challenge and discover the science that powers David Beckham's longevity.</p>
+        <div class="reward-box">
+          <div class="reward-box-icon">🎁</div>
+          <div class="reward-box-text">
+            <div class="label">Completion Reward</div>
+            <div class="value">$50 off your first IM8 order + be entered into a draw to Win an F1 Paddock Pass</div>
+            <div class="code-pill">IM8F1WIN</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       SLIDE 6: APP MOCKUP — USER JOURNEY
+  ========================================== -->
+  <section class="slide slide-mockup">
+    <div class="inner">
+      <div class="mockup-header">
+        <div class="section-label" style="color:var(--strava-orange); text-align:center">The User Journey</div>
+        <h2 class="slide-title" style="text-align:center; font-size: clamp(28px, 3vw, 44px);">From Discovery to <em>Discount Code</em></h2>
+      </div>
+      <div class="phones-row">
+
+        <!-- Phone 1: Discovery -->
+        <div class="phone-wrapper">
+          <div class="phone-step">
+            <div class="step-num">01</div>
+            <div class="step-label">Discovery</div>
+          </div>
+          <div class="phone-frame">
+            <div class="screen-discovery">
+              <div class="phone-statusbar">
+                <span class="time">9:41</span>
+                <span class="icons">▲ WiFi 🔋</span>
+              </div>
+              <div class="phone-nav">
+                <span class="title">Home</span>
+                <div class="icons-right"><span>💬</span><span>🔔</span></div>
+              </div>
+              <!-- Regular feed item -->
+              <div class="feed-item">
+                <div class="feed-user">
+                  <div class="feed-avatar">JD</div>
+                  <div class="feed-user-info">
+                    <div class="name">James D.</div>
+                    <div class="time">2h ago · London</div>
+                  </div>
+                </div>
+                <div class="feed-activity-img">🗺 Morning Run · 8.2km</div>
+              </div>
+              <!-- IM8 Challenge Card -->
+              <div class="challenge-feed-card">
+                <div class="sponsored-tag">Sponsored</div>
+                <div class="challenge-feed-inner">
+                  <svg class="mini-badge" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="16" cy="16" r="15" fill="#5A000D"/>
+                    <circle cx="16" cy="16" r="14" fill="none" stroke="#F08070" stroke-width="0.5"/>
+                    <text x="16" y="14" text-anchor="middle" font-size="6" font-weight="bold" fill="#F5EFE6" font-family="Georgia">IM8</text>
+                    <text x="16" y="22" text-anchor="middle" font-size="4" fill="#F08070" font-family="Georgia" font-style="italic">Love Life</text>
+                  </svg>
+                  <div class="challenge-feed-text">
+                    <div class="ctitle">IM8 Love Life 120 Challenge</div>
+                    <div class="cdesc">Log 120 mins of activity in 30 days. Win $50 off + F1 Paddock Pass draw.</div>
+                    <div class="join-btn-mini">Join Challenge</div>
+                  </div>
+                </div>
+              </div>
+              <!-- Another feed item -->
+              <div class="feed-item" style="margin-top:4px">
+                <div class="feed-user">
+                  <div class="feed-avatar">SR</div>
+                  <div class="feed-user-info">
+                    <div class="name">Sarah R.</div>
+                    <div class="time">3h ago · NYC</div>
+                  </div>
+                </div>
+                <div class="feed-activity-img" style="background: linear-gradient(135deg,#1a2a4a,#0a1a3a)">🚴 Cycling · 24km</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 2: Challenge Detail -->
+        <div class="phone-wrapper">
+          <div class="phone-step">
+            <div class="step-num">02</div>
+            <div class="step-label">Join</div>
+          </div>
+          <div class="phone-frame">
+            <div class="screen-detail">
+              <div style="padding-top: 28px;"></div>
+              <div class="detail-hero">
+                <svg viewBox="0 0 80 60" width="80" xmlns="http://www.w3.org/2000/svg">
+                  <text x="40" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#F5EFE6" font-family="Georgia">IM8</text>
+                  <text x="40" y="44" text-anchor="middle" font-size="8" fill="#F08070" font-family="Georgia" font-style="italic">Love Life</text>
+                </svg>
+              </div>
+              <div class="detail-body">
+                <div class="detail-title">IM8 Love Life 120 Challenge</div>
+                <div class="detail-desc">Log 120 minutes of any activity over 30 days and unlock $50 off your first IM8 order + chance to Win an F1 Paddock Pass.</div>
+                <div class="detail-meta">
+                  <div class="detail-meta-row">
+                    <span class="detail-meta-icon">📅</span>
+                    <span>Ends — 30 days from join</span>
+                  </div>
+                  <div class="detail-meta-row">
+                    <span class="detail-meta-icon">⏱</span>
+                    <span>Complete 120 minutes of activity</span>
+                  </div>
+                  <div class="detail-meta-row">
+                    <span class="detail-meta-icon">🏆</span>
+                    <span>Win digital badge + 20% off IM8</span>
+                  </div>
+                  <div class="detail-meta-row">
+                    <span class="detail-meta-icon">🌍</span>
+                    <span>Run, Walk, Cycle, Swim + more</span>
+                  </div>
+                </div>
+                <div class="join-cta-btn">Join Challenge</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 3: In Progress -->
+        <div class="phone-wrapper">
+          <div class="phone-step">
+            <div class="step-num">03</div>
+            <div class="step-label">In Progress</div>
+          </div>
+          <div class="phone-frame">
+            <div class="screen-progress">
+              <div class="progress-challenge-header">
+                <svg class="progress-badge-small" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="22" cy="22" r="21" fill="#5A000D"/>
+                  <circle cx="22" cy="22" r="20" fill="none" stroke="#F08070" stroke-width="0.8"/>
+                  <text x="22" y="20" text-anchor="middle" font-size="8" font-weight="bold" fill="#F5EFE6" font-family="Georgia">IM8</text>
+                  <text x="22" y="29" text-anchor="middle" font-size="6" fill="#F08070" font-family="Georgia" font-style="italic">Love Life</text>
+                </svg>
+                <div class="progress-title">IM8 Love Life 120 Challenge</div>
+              </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-label">
+                  <span>74 mins logged</span>
+                  <span>120 min goal</span>
+                </div>
+                <div class="progress-bar-track">
+                  <div class="progress-bar-fill"></div>
+                </div>
+                <div style="font-size:7px; color:var(--coral); margin-top:3px; text-align:right">62% Complete</div>
+              </div>
+              <div class="progress-stats">
+                <div class="progress-stat"><div class="pval">74</div><div class="plabel">Mins</div></div>
+                <div class="progress-stat"><div class="pval">46</div><div class="plabel">To Go</div></div>
+                <div class="progress-stat"><div class="pval">18</div><div class="plabel">Days Left</div></div>
+              </div>
+              <div class="leaderboard-mini">
+                <div class="lb-title">Friends in Challenge</div>
+                <div class="lb-row">
+                  <div class="lb-rank">1</div>
+                  <div class="lb-avatar-mini">SR</div>
+                  <div class="lb-name">Sarah R.</div>
+                  <div class="lb-mins">108 min</div>
+                </div>
+                <div class="lb-row">
+                  <div class="lb-rank">2</div>
+                  <div class="lb-avatar-mini">ME</div>
+                  <div class="lb-name" style="color:var(--coral); font-weight:700">You</div>
+                  <div class="lb-mins">74 min</div>
+                </div>
+                <div class="lb-row">
+                  <div class="lb-rank">3</div>
+                  <div class="lb-avatar-mini">JD</div>
+                  <div class="lb-name">James D.</div>
+                  <div class="lb-mins">61 min</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone 4: Complete + Reward -->
+        <div class="phone-wrapper">
+          <div class="phone-step">
+            <div class="step-num">04</div>
+            <div class="step-label">Reward</div>
+          </div>
+          <div class="phone-frame">
+            <div class="screen-complete">
+              <div class="complete-confetti">🎉</div>
+              <div class="complete-title">Challenge Complete!</div>
+              <div class="complete-subtitle">You've logged 120 minutes.<br>You earned it.</div>
+              <svg class="complete-badge-large" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="30" fill="#5A000D"/>
+                <circle cx="32" cy="32" r="28" fill="none" stroke="#F08070" stroke-width="1.5"/>
+                <text x="32" y="28" text-anchor="middle" font-size="12" font-weight="bold" fill="#F5EFE6" font-family="Georgia">IM8</text>
+                <text x="32" y="39" text-anchor="middle" font-size="7" fill="#F08070" font-family="Georgia" font-style="italic">Love Life</text>
+                <text x="32" y="48" text-anchor="middle" font-size="5" fill="rgba(245,239,230,0.6)" font-family="sans-serif">COMPLETED</text>
+              </svg>
+              <div class="complete-stats">
+                <div class="complete-stat"><div class="v">128</div><div class="l">Mins</div></div>
+                <div class="complete-stat"><div class="v">26d</div><div class="l">Taken</div></div>
+              </div>
+              <div class="redeem-btn">Redeem Reward</div>
+              <div class="discount-code-display">IM8F1WIN</div>
+              <div style="font-size:7px; color:rgba(255,255,255,0.35); margin-top:4px; line-height:1.3">$50 off your first IM8 order + F1 Paddock Pass draw.<br>Valid 30 days. One winner drawn from all completions.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       SLIDE 7: THE NUMBERS
+  ========================================== -->
+  <section class="slide slide-numbers">
+    <div class="inner">
+      <div class="section-label">The Scale — Recommended Package: Global 6-Week Challenge</div>
+      <h2 class="slide-title">Built to hit <em>every</em> KPI.</h2>
+      <div class="numbers-grid">
+        <div class="number-card">
+          <div class="check-mark">✓</div>
+          <div class="num">1.06M</div>
+          <div class="label">Estimated athlete joins</div>
+          <div class="context">Global targeting across 185 countries. A 6-week challenge window maximises viral sharing and social proof through follower feeds.</div>
+        </div>
+        <div class="number-card featured">
+          <div class="check-mark">✓</div>
+          <div class="num">125.6M</div>
+          <div class="label">Estimated impressions</div>
+          <div class="context">Every join, activity log, and completion generates feed impressions. The 6-week window compounds reach as more athletes join over time.</div>
+        </div>
+        <div class="number-card">
+          <div class="check-mark">✓</div>
+          <div class="num">742K</div>
+          <div class="label">Estimated completions (70% rate)</div>
+          <div class="context">Strava's 70% challenge completion rate is the highest of any fitness platform. Completing athletes are the warmest possible IM8 prospects.</div>
+        </div>
+      </div>
+
+      <div class="funnel-diagram">
+        <div class="funnel-step">
+          <div class="funnel-num">1.06M</div>
+          <div class="funnel-label">Athletes<br>Join</div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-num">742K</div>
+          <div class="funnel-label">Athletes<br>Complete</div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-num">148K</div>
+          <div class="funnel-label">Click Reward<br>(20% rate)</div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-num" style="color:var(--crimson)">100K</div>
+          <div class="funnel-label">New IM8<br>Customers<br><span style="font-size:10px;color:var(--crimson)">Target ✓</span></div>
+        </div>
+        <div class="funnel-step">
+          <div class="funnel-num" style="color:var(--crimson)">£7M+</div>
+          <div class="funnel-label">Revenue<br>Potential<br><span style="font-size:10px;color:rgba(0,0,0,0.4)">@ £70 AOV</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       SLIDE 8: INVESTMENT
+  ========================================== -->
+  <section class="slide slide-investment">
+    <div class="inner">
+      <div class="investment-header">
+        <div class="section-label" style="color:var(--strava-orange); text-align:center">Investment Options — 2026</div>
+        <h2 class="slide-title" style="text-align:center; font-size: clamp(28px,3vw,44px);">Choose your <em>scale.</em></h2>
+      </div>
+      <div class="packages-grid">
+
+        <div class="package-card">
+          <div class="package-market">🇬🇧🇺🇸 UK + USA</div>
+          <div class="package-duration">4-Week</div>
+          <div class="package-price">€108,000</div>
+          <div class="package-divider"></div>
+          <div class="package-metric"><div class="val">258K</div><div class="lbl">Est. Joins</div></div>
+          <div class="package-metric"><div class="val">25.3M</div><div class="lbl">Est. Impressions</div></div>
+          <div class="package-metric"><div class="val">180.6K</div><div class="lbl">Est. Completions</div></div>
+        </div>
+
+        <div class="package-card">
+          <div class="package-market">🇬🇧🇺🇸 UK + USA</div>
+          <div class="package-duration">8-Week</div>
+          <div class="package-price">€132,000</div>
+          <div class="package-divider"></div>
+          <div class="package-metric"><div class="val">323K</div><div class="lbl">Est. Joins</div></div>
+          <div class="package-metric"><div class="val">44.1M</div><div class="lbl">Est. Impressions</div></div>
+          <div class="package-metric"><div class="val">226.1K</div><div class="lbl">Est. Completions</div></div>
+        </div>
+
+        <div class="package-card recommended">
+          <div class="package-tag">★ Recommended</div>
+          <div class="package-market">🌍 Global</div>
+          <div class="package-duration">6-Week</div>
+          <div class="package-price">€227,500</div>
+          <div class="package-divider"></div>
+          <div class="package-metric recommended-metric"><div class="val">1.06M</div><div class="lbl">Est. Joins ✓ KPI HIT</div></div>
+          <div class="package-metric recommended-metric"><div class="val">125.6M</div><div class="lbl">Est. Impressions ✓ KPI HIT</div></div>
+          <div class="package-metric recommended-metric"><div class="val">742K</div><div class="lbl">Est. Completions</div></div>
+        </div>
+
+        <div class="package-card">
+          <div class="package-market">🌍 Global</div>
+          <div class="package-duration">4-Week</div>
+          <div class="package-price">€207,400</div>
+          <div class="package-divider"></div>
+          <div class="package-metric"><div class="val">942K</div><div class="lbl">Est. Joins</div></div>
+          <div class="package-metric"><div class="val">91.6M</div><div class="lbl">Est. Impressions</div></div>
+          <div class="package-metric"><div class="val">659.4K</div><div class="lbl">Est. Completions</div></div>
+        </div>
+
+        <div class="package-card">
+          <div class="package-market">🌍 Global</div>
+          <div class="package-duration">8-Week</div>
+          <div class="package-price">€247,600</div>
+          <div class="package-divider"></div>
+          <div class="package-metric"><div class="val">1.18M</div><div class="lbl">Est. Joins</div></div>
+          <div class="package-metric"><div class="val">159.6M</div><div class="lbl">Est. Impressions</div></div>
+          <div class="package-metric"><div class="val">824.6K</div><div class="lbl">Est. Completions</div></div>
+        </div>
+
+      </div>
+
+      <div class="add-ons-section">
+        <div class="add-ons-title">Optional Add-Ons to Amplify Reach</div>
+        <div class="add-ons-grid">
+          <div class="add-on-item">
+            <div class="name">In-Feed Promotion<br><span style="color:rgba(255,255,255,0.35);font-size:10px">2 Weeks · 33.4M reach</span></div>
+            <div class="price">€290,900</div>
+          </div>
+          <div class="add-on-item">
+            <div class="name">Custom In-Feed Promo<br><span style="color:rgba(255,255,255,0.35);font-size:10px">2 Weeks · 33.4M reach</span></div>
+            <div class="price">€436,300</div>
+          </div>
+          <div class="add-on-item">
+            <div class="name">Email Promotion<br><span style="color:rgba(255,255,255,0.35);font-size:10px">One send · 19.8M reach</span></div>
+            <div class="price">€516,700</div>
+          </div>
+          <div class="add-on-item">
+            <div class="name">Reward Reminder Email<br><span style="color:rgba(255,255,255,0.35);font-size:10px">Post-completion nudge</span></div>
+            <div class="price">€11,300–€25,100</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       SLIDE 9: CASE STUDIES
+  ========================================== -->
+  <section class="slide slide-cases">
+    <div class="inner">
+      <div class="cases-header">
+        <div class="section-label" style="color:var(--strava-orange); text-align:center">Proof It Works</div>
+        <h2 class="slide-title" style="text-align:center; font-size: clamp(28px,3vw,44px);">Brands that moved — and <em>won.</em></h2>
+      </div>
+      <div class="cases-grid">
+
+        <div class="case-card">
+          <div class="case-brand">Adidas</div>
+          <div class="case-campaign">You Got This:<br>100 Days Challenge</div>
+          <div class="case-results">
+            <div class="case-result-row">
+              <div class="case-result-val">1.9M</div>
+              <div class="case-result-label">Total participants</div>
+            </div>
+            <div class="case-result-row">
+              <div class="case-result-val">175M</div>
+              <div class="case-result-label">Kudos generated</div>
+            </div>
+            <div class="case-result-row">
+              <div class="case-result-val green">+11%</div>
+              <div class="case-result-label">Brand Consideration Lift</div>
+            </div>
+            <div class="case-result-row">
+              <div class="case-result-val green">+45%</div>
+              <div class="case-result-label">Message Recall Lift</div>
+            </div>
+          </div>
+          <div class="case-relevance">Targeted Gen Z women — <strong>IM8's fastest-growing demographic</strong> on Strava. Proves lifestyle brand positioning drives massive recall uplift.</div>
+        </div>
+
+        <div class="case-card">
+          <div class="case-brand">Nike</div>
+          <div class="case-campaign">The Big Run:<br>Secret Run Club</div>
+          <div class="case-results">
+            <div class="case-result-row">
+              <div class="case-result-val">444K</div>
+              <div class="case-result-label">Challenge participants</div>
+            </div>
+            <div class="case-result-row">
+              <div class="case-result-val">4.5M</div>
+              <div class="case-result-label">Total campaign views</div>
+            </div>
+            <div class="case-result-row">
+              <div class="case-result-val">49K</div>
+              <div class="case-result-label">Social shares</div>
+            </div>
+            <div class="case-result-row">
+              <div class="case-result-val green">+112%</div>
+              <div class="case-result-label">On-Platform Brand Recall</div>
+            </div>
+          </div>
+          <div class="case-relevance">8-week distance challenge proving <strong>longer challenge windows drive deeper brand association</strong>. 49K organic social shares = free amplification.</div>
+        </div>
+
+        <div class="case-card">
+          <div class="case-brand">Samsung</div>
+          <div class="case-campaign">Be a Winner,<br>Not a Quitter</div>
+          <div class="case-results">
+            <div class="case-result-row">
+              <div class="case-result-val green">20%</div>
+              <div class="case-result-label">of Galaxy Watch sales from Strava discount code</div>
+            </div>
+            <div class="case-result-row" style="margin-top:8px">
+              <div class="case-result-val" style="font-size:18px; color:rgba(255,255,255,0.5)">Direct</div>
+              <div class="case-result-label">measurable revenue attribution via unique discount code</div>
+            </div>
+          </div>
+          <div class="case-relevance" style="margin-top:28px"><strong>Most directly analogous to IM8's activation.</strong> Discount code reward drove measurable sales lift — proves the LOVELIFE20 mechanic works at scale. Samsung ran a 250-minute goal challenge with 25% discount reward.</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       SLIDE 10: KPI SCORECARD
+  ========================================== -->
+  <section class="slide slide-kpi">
+    <div class="cover-grid" style="opacity:0.03"></div>
+    <div class="inner">
+      <div class="section-label" style="color:var(--coral); text-align:center">KPI Scorecard — Global 6-Week Challenge</div>
+      <h2 class="slide-title" style="text-align:center; color:var(--cream); font-size: clamp(28px,3.5vw,52px);">All three targets. <em>One activation.</em></h2>
+      <div class="kpi-grid">
+        <div class="kpi-big-card">
+          <div class="kpi-icon">🏃</div>
+          <div class="kpi-big-num">1.06M</div>
+          <div class="kpi-big-label">Athletes Reached</div>
+          <div class="kpi-big-context">Target was 1 million. Global 6-week challenge delivers 1.06M estimated joins — with viral follower-feed amplification growing reach beyond that number.</div>
+        </div>
+        <div class="kpi-big-card">
+          <div class="kpi-icon">👁️</div>
+          <div class="kpi-big-num">125.6M</div>
+          <div class="kpi-big-label">Impressions</div>
+          <div class="kpi-big-context">Target was 100 million. Every activity log, leaderboard view, and follower feed notification contributes. Add in-feed promotion to push above 160M impressions.</div>
+        </div>
+        <div class="kpi-big-card">
+          <div class="kpi-icon">🛒</div>
+          <div class="kpi-big-num">100K</div>
+          <div class="kpi-big-label">New Customers Target</div>
+          <div class="kpi-big-context">742K completions → 148K reward clicks (20% rate) → 100K+ conversions with a modest 68% claim rate. Samsung proved this mechanic works: 20% of hardware sales from a single Strava discount code. The F1 Paddock Pass prize will dramatically increase join and completion rates.</div>
+        </div>
+      </div>
+      <div class="roi-banner">
+        <div class="roi-item">
+          <div class="roi-val">€227.5K</div>
+          <div class="roi-label">Total Investment</div>
+        </div>
+        <div class="roi-divider"></div>
+        <div class="roi-item">
+          <div class="roi-val">£7M+</div>
+          <div class="roi-label">Revenue Potential<br><span style="font-size:10px">100K customers @ £70 AOV</span></div>
+        </div>
+        <div class="roi-divider"></div>
+        <div class="roi-item">
+          <div class="roi-val">30:1</div>
+          <div class="roi-label">Potential ROI<br><span style="font-size:10px">vs. Strava's stated 10:1</span></div>
+        </div>
+        <div class="roi-divider"></div>
+        <div class="roi-item">
+          <div class="roi-val">£2.28</div>
+          <div class="roi-label">Cost Per<br>New Customer</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       SLIDE 11: NEXT STEPS
+  ========================================== -->
+  <section class="slide slide-nextsteps">
+    <div class="inner">
+      <div class="section-label">What Happens Next</div>
+      <h2 class="slide-title">From proposal to<br><em>launch.</em></h2>
+      <div class="steps-timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot">1</div>
+          <div class="timeline-content">
+            <div class="step-title">Brief Confirmed</div>
+            <div class="step-body">IM8 confirms the Global 6-week package, challenge goal (120 minutes), and reward mechanic (LOVELIFE20, 20% off first order).</div>
+            <span class="step-timing">Week 1</span>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">2</div>
+          <div class="timeline-content">
+            <div class="step-title">Creative Development</div>
+            <div class="step-body">Strava's creative team builds the challenge badge, in-feed card, email templates, and reward landing page — all in IM8 brand guidelines. IM8 reviews and approves.</div>
+            <span class="step-timing">Weeks 2–4</span>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">3</div>
+          <div class="timeline-content">
+            <div class="step-title">Technical Setup</div>
+            <div class="step-body">Reward fulfilment integrated. Unique discount code (LOVELIFE20) connected to IM8's e-commerce platform. Tracking pixels and attribution set up for full conversion reporting.</div>
+            <span class="step-timing">Weeks 3–5</span>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">4</div>
+          <div class="timeline-content">
+            <div class="step-title">Go Live</div>
+            <div class="step-body">Challenge launches globally on Strava. In-feed and email promotions amplify launch week reach. IM8 promotes via owned channels (social, email, David Beckham partnership content).</div>
+            <span class="step-timing">Week 6</span>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">5</div>
+          <div class="timeline-content">
+            <div class="step-title">Reporting & Optimisation</div>
+            <div class="step-body">Real-time dashboard tracks joins, impressions, completions, and reward redemptions. Mid-challenge review to identify optimisation opportunities. Full post-campaign report at close.</div>
+            <span class="step-timing">Throughout + Week 12</span>
+          </div>
+        </div>
+      </div>
+      <div class="contact-box">
+        <div>
+          <div class="label">IM8 × Strava · 2026</div>
+          <div class="tagline">"Love Life. Move More."</div>
+        </div>
+        <button class="love-life-cta">Let's Move Forward →</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  const deck = document.getElementById('deck');
+  const slides = document.querySelectorAll('.slide');
+  const navDotsContainer = document.getElementById('navDots');
+  const slideCounter = document.getElementById('slideCounter');
+  const total = slides.length;
+  let current = 0;
+
+  // Create nav dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    navDotsContainer.appendChild(dot);
+  });
+
+  function updateNav(idx) {
+    document.querySelectorAll('.nav-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
+    });
+    slideCounter.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+    current = idx;
+  }
+
+  function goTo(idx) {
+    slides[idx].scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function nextSlide() { if (current < total - 1) goTo(current + 1); }
+  function prevSlide() { if (current > 0) goTo(current - 1); }
+
+  // Intersection observer for current slide detection
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && e.intersectionRatio > 0.5) {
+        const idx = Array.from(slides).indexOf(e.target);
+        updateNav(idx);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  slides.forEach(s => observer.observe(s));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  });
+</script>
+</body>
+</html>
